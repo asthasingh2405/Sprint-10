@@ -1,47 +1,55 @@
-// frontend/src/components/PostList.jsx
-import React, { useEffect, useState } from 'react';
-import { fetchPosts, deletePost } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { fetchPosts } from '../services/api';
 
 const PostList = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const loadPosts = async () => {
-    try {
-      const data = await fetchPosts();
-      setPosts(data);
-    } catch (err) {
-      console.error('Failed to load posts:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    loadPosts();
+    const getPosts = async () => {
+      try {
+        const data = await fetchPosts();
+        setPosts(data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching posts:', err);
+        setError('Failed to fetch posts. Ensure backend server is running on port 5000.');
+        setLoading(false);
+      }
+    };
+
+    getPosts();
   }, []);
 
-  const handleDelete = async (id) => {
-    try {
-      await deletePost(id);
-      setPosts(posts.filter((post) => post._id !== id));
-    } catch (err) {
-      console.error('Failed to delete post:', err);
-    }
-  };
-
-  if (loading) return <p>Loading posts from database...</p>;
+  if (loading) return <p>Loading posts...</p>;
+  if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
   return (
-    <div className="post-grid">
-      {posts.map((post) => (
-        <div key={post._id} className="post-card">
-          <h3>{post.title}</h3>
-          <p>{post.content}</p>
-          <small>Author: {post.authorId?.name || 'Unknown'}</small>
-          <button onClick={() => handleDelete(post._id)}>Delete</button>
-        </div>
-      ))}
+    <div style={{ marginTop: '20px' }}>
+      <h2>Recent Posts</h2>
+      {posts.length === 0 ? (
+        <p>No posts found. Create one above!</p>
+      ) : (
+        posts.map((post) => (
+          <div
+            key={post._id}
+            style={{
+              border: '1px solid #ccc',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '15px',
+              backgroundColor: '#f9f9f9',
+            }}
+          >
+            <h3>{post.title}</h3>
+            <p>{post.content}</p>
+            <small style={{ color: '#666' }}>
+              Author: {post.authorId?.name || post.authorId?.email || 'Unknown Author'}
+            </small>
+          </div>
+        ))
+      )}
     </div>
   );
 };

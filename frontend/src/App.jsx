@@ -1,19 +1,20 @@
-// frontend/src/App.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import CreatePostForm from './components/CreatePostForm';
 import PostList from './components/PostList';
 
 function App() {
-  const handlePostCreated = (newPost) => {
-    console.log('New post added to MongoDB Atlas:', newPost);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handlePostCreated = () => {
+    setRefreshKey((prev) => prev + 1);
   };
 
   return (
-    <div className="App">
-      <h1 style={{ textAlign: 'center' }}>Prodesk IT — Data Management Dashboard</h1>
+    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+      <h1>Prodesk IT — Data Management Dashboard</h1>
       <CreatePostForm onPostCreated={handlePostCreated} />
-      <hr style={{ margin: '40px 0' }} />
-      <PostList />
+      <hr />
+      <PostList key={refreshKey} />
     </div>
   );
 }
